@@ -8,18 +8,30 @@ class FullmenuSpider(scrapy.Spider):
     start_urls = ["https://www.mcdonalds.com/ua/uk-ua/eat/fullmenu.html"]
 
     def parse(self, response: Response, **kwargs):
+        """
+        @url https://www.mcdonalds.com/ua/uk-ua/eat/fullmenu.html
+        @returns requests 60 120
+        """
         for product in response.css(".cmp-category__item-link::attr(href)").getall():
             yield response.follow(product, callback=self.parse_product)
 
     def parse_product(self, response: Response):
+        """
+        @url https://www.mcdonalds.com/ua/uk-ua/product/200360.html
+        @returns requests 1 1
+        """
         id = response.url.split("/")[-1].replace(".html", "")
 
         url = f"https://www.mcdonalds.com/dnaapp/itemDetails?country=UA&language=uk&showLiveData=true&item={id}"
 
         yield scrapy.Request(url, callback=self.parse_product_detail)
 
-
     def parse_product_detail(self, response: Response):
+        """
+        @url https://www.mcdonalds.com/dnaapp/itemDetails?country=UA&language=uk&showLiveData=true&item=200360
+        @returns items 1 1
+        @scrapes name description calories fats carbs protein unsaturated_fats sugar salt portion
+        """
         data = response.json()
         item = data.get("item")
         name = item.get("item_name").replace("\"", "")
@@ -34,7 +46,7 @@ class FullmenuSpider(scrapy.Spider):
             "Цукор": "sugar",
             "Білки": "protein",
             "Вага порції": "portion",
-            "Сіль": "salt"
+            "Сіль": "salt",
         }
 
         product_details = {
@@ -53,6 +65,8 @@ class FullmenuSpider(scrapy.Spider):
         for nutrient_fact in nutrient_facts.get("nutrient"):
             nutrient_name = nutrient_fact.get("name")
             if nutrient_name in nutrient_map:
-                product_details[nutrient_map[nutrient_name]] = nutrient_fact.get("value")
+                product_details[nutrient_map[nutrient_name]] = nutrient_fact.get(
+                    "value"
+                )
 
         yield product_details
