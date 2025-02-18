@@ -1,24 +1,17 @@
-import json
 from typing import List
 
 from fastapi import APIRouter, HTTPException, Depends
-from starlette.responses import JSONResponse
+
+from schemas.products import ProductResponseSchema
+from utils import read_products_file
 
 routes = APIRouter()
 
 
-def read_products_file() -> List[dict]:
-    try:
-        with open("products.json", "r", encoding="utf-8") as file:
-            data = json.load(file)
-    except (FileNotFoundError, json.JSONDecodeError):
-        raise HTTPException(status_code=500, detail="Data file is missing or invalid")
-    return data
-
-
 @routes.get("/all_products/")
 def get_all_products(data: List[dict] = Depends(read_products_file)):
-    return JSONResponse(content=data)
+    products = [ProductResponseSchema(**product) for product in data]
+    return products
 
 
 @routes.get("/products/{product_name}")
@@ -27,7 +20,7 @@ def get_product_by_name(
         data: List[dict] = Depends(read_products_file)
 ):
     products = [
-        product
+        ProductResponseSchema(**product)
         for product in data
         if product_name.lower() in product.get("name").lower()
     ]
@@ -36,7 +29,7 @@ def get_product_by_name(
             status_code=404,
             detail=f"No products found with name containing '{product_name}'"
         )
-    return JSONResponse(content=products)
+    return products
 
 
 @routes.get("/products/{product_name}/{product_field}")
@@ -50,9 +43,9 @@ def get_product_field(
         for product in data
         if product_name.lower() in product.get("name").lower()
     ]
-    if not any(products):
+    if None in products:
         raise HTTPException(
             status_code=404,
             detail=f"No products found with name containing '{product_name}' or field '{product_field}'",
         )
-    return JSONResponse(content=products)
+    return products
