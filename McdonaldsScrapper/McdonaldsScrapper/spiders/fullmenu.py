@@ -26,43 +26,33 @@ class FullmenuSpider(scrapy.Spider):
         description = item.get("description")
         nutrient_facts = item.get("nutrient_facts")
 
-        calories = None
-        fats = None
-        unsaturated_fats = None
-        carbs = None
-        sugar = None
-        protein = None
-        portion = None
-        salt = None
+        nutrient_map = {
+            "Калорійність": "calories",
+            "Жири": "fats",
+            "НЖК": "unsaturated_fats",
+            "Вуглеводи": "carbs",
+            "Цукор": "sugar",
+            "Білки": "protein",
+            "Вага порції": "portion",
+            "Сіль": "salt"
+        }
+
+        product_details = {
+            "name": name,
+            "description": description,
+            "calories": None,
+            "fats": None,
+            "carbs": None,
+            "protein": None,
+            "unsaturated_fats": None,
+            "sugar": None,
+            "salt": None,
+            "portion": None,
+        }
 
         for nutrient_fact in nutrient_facts.get("nutrient"):
             nutrient_name = nutrient_fact.get("name")
-            if nutrient_name == "Калорійність":
-                calories = nutrient_fact.get("value")
-            elif nutrient_name == "Жири":
-                fats = nutrient_fact.get("value")
-            elif nutrient_name == "НЖК":
-                unsaturated_fats = nutrient_fact.get("value")
-            elif nutrient_name == "Вуглеводи":
-                carbs = nutrient_fact.get("value")
-            elif nutrient_name == "Цукор":
-                sugar = nutrient_fact.get("value")
-            elif nutrient_name == "Білки":
-                protein = nutrient_fact.get("value")
-            elif nutrient_name == "Вага порції":
-                portion = nutrient_fact.get("value")
-            elif nutrient_name == "Сіль":
-                salt = nutrient_fact.get("value")
+            if nutrient_name in nutrient_map:
+                product_details[nutrient_map[nutrient_name]] = nutrient_fact.get("value")
 
-        yield {
-            "name": name,
-            "description": description,
-            "calories": calories,
-            "fats": fats,
-            "carbs": carbs,
-            "protein": protein,
-            "unsaturated_fats": unsaturated_fats,
-            "sugar": sugar,
-            "salt": salt,
-            "portion": portion,
-        }
+        yield product_details
