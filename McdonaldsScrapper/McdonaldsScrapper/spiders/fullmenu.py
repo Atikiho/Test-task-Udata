@@ -22,8 +22,8 @@ class FullmenuSpider(scrapy.Spider):
     def parse_product_detail(self, response: Response):
         data = response.json()
         item = data.get("item")
-        name = item.get("item_name")
-        description = item.get("description")
+        name = item.get("item_name").replace("\"", "")
+        description = item.get("description").replace("\r\n", " ")
         nutrient_facts = item.get("nutrient_facts")
 
         nutrient_map = {
