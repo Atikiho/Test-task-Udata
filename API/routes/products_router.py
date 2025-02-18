@@ -1,12 +1,13 @@
 import json
+from typing import List
 
-from fastapi import APIRouter, HTTPException
+from fastapi import APIRouter, HTTPException, Depends
 from starlette.responses import JSONResponse
 
 routes = APIRouter()
 
 
-def read_products_file():
+def read_products_file() -> List[dict]:
     try:
         with open("products.json", "r", encoding="utf-8") as file:
             data = json.load(file)
@@ -16,14 +17,15 @@ def read_products_file():
 
 
 @routes.get("/all_products/")
-def get_all_products():
-    data = read_products_file()
+def get_all_products(data: List[dict] = Depends(read_products_file)):
     return JSONResponse(content=data)
 
 
 @routes.get("/products/{product_name}")
-def get_product_by_name(product_name: str):
-    data = read_products_file()
+def get_product_by_name(
+        product_name: str,
+        data: List[dict] = Depends(read_products_file)
+):
     products = [
         product
         for product in data
@@ -38,8 +40,11 @@ def get_product_by_name(product_name: str):
 
 
 @routes.get("/products/{product_name}/{product_field}")
-def get_product_field(product_name: str, product_field: str):
-    data = read_products_file()
+def get_product_field(
+        product_name: str,
+        product_field: str,
+        data: List[dict] = Depends(read_products_file)
+):
     products = [
         product.get(product_field)
         for product in data
