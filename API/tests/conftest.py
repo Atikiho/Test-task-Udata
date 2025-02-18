@@ -6,19 +6,7 @@ from fastapi.testclient import TestClient
 from API.main import app
 from API.utils import read_products_file
 
-
-@pytest.fixture(scope="function")
-def client():
-    app.dependency_overrides[read_products_file] = mock_read_products_file
-
-    with TestClient(app) as test_client:
-        yield test_client
-
-    app.dependency_overrides[read_products_file] = None
-
-
-def mock_read_products_file() -> List[dict]:
-    return [
+mock_return_value = [
         {
             "name": "Чай зелений",
             "description": "Оригінальний зелений чай.",
@@ -32,3 +20,17 @@ def mock_read_products_file() -> List[dict]:
             "portion": 300
         }
     ]
+
+
+@pytest.fixture(scope="function")
+def client():
+    app.dependency_overrides[read_products_file] = mock_read_products_file
+
+    with TestClient(app) as test_client:
+        yield test_client
+
+    app.dependency_overrides[read_products_file] = None
+
+
+def mock_read_products_file() -> List[dict]:
+    return mock_return_value
