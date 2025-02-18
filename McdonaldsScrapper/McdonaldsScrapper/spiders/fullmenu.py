@@ -1,6 +1,8 @@
 import scrapy
 from scrapy.http import Response
 
+from McdonaldsScrapper.items import ProductItem
+
 
 class FullmenuSpider(scrapy.Spider):
     name = "fullmenu"
@@ -65,8 +67,8 @@ class FullmenuSpider(scrapy.Spider):
         for nutrient_fact in nutrient_facts.get("nutrient"):
             nutrient_name = nutrient_fact.get("name")
             if nutrient_name in nutrient_map:
-                product_details[nutrient_map[nutrient_name]] = nutrient_fact.get(
+                product_details[nutrient_map[nutrient_name]] = float(nutrient_fact.get(
                     "value"
-                )
+                ))
 
-        yield product_details
+        yield ProductItem(**product_details)
