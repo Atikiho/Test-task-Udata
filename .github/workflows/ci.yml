@@ -26,3 +26,5 @@ jobs:
       - name: Run api tests
         run: |
           pytest
+          cd McdonaldsScrapper
+          scrapy check
