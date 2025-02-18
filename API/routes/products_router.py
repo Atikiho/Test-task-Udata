@@ -2,8 +2,8 @@ from typing import List
 
 from fastapi import APIRouter, HTTPException, Depends
 
-from schemas.products import ProductResponseSchema
-from utils import read_products_file
+from API.schemas.products import ProductResponseSchema
+from API.utils import read_products_file
 
 routes = APIRouter()
 
